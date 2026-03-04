@@ -90,7 +90,7 @@ export const TELEGRAM_ONLY =
 // Available models for /models command (OpenRouter/Claude API compatible)
 export const ANTHROPIC_MODELS = (
   process.env.ANTHROPIC_MODELS ||
-  'minimax/minimax-m2.5,x-ai/grok-4.1-fast,z-ai/glm-5'
+  'minimax/minimax-m2.5,x-ai/grok-4.1-fast,z-ai/glm-5,google/gemini-2.0-flash-001,google/gemini-1.5-pro-002,google/gemini-2.0-flash-lite-001'
 )
   .split(',')
   .map((m) => m.trim())

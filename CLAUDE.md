@@ -58,3 +58,8 @@ systemctl --user restart nanoclaw
 ## Container Build Cache
 
 The container buildkit caches the build context aggressively. `--no-cache` alone does NOT invalidate COPY steps — the builder's volume retains stale files. To force a truly clean rebuild, prune the builder then re-run `./container/build.sh`.
+
+## Antigravity (Gemini) Compatibility
+
+This project is configured to support Google Antigravity IDE alongside Claude Code. 
+A symlink exists at `.agent/skills` that points to `.claude/skills`. Antigravity agents natively pick up these skills.

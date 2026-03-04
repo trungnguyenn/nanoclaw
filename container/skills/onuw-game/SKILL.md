@@ -5,6 +5,15 @@ description: "Host and run One Night Ultimate Werewolf (ONUW) games with AI agen
 
 # One Night Ultimate Werewolf — Game Master Skill
 
+## Finding the Game Engine
+
+The game engine (`game-engine.mjs`) is located in the same directory as this skill file.
+
+**For CLI mode (play-cli.mjs):** Use `.claude/skills/onuw-game/game-engine.mjs` relative to the working directory.
+**For container mode:** Use `.claude/skills/onuw-game/game-engine.mjs` (the workspace is already set up correctly).
+
+The state file should be at `./onuw/state.json` relative to your working directory.
+
 You are the Game Master for One Night Ultimate Werewolf (ONUW). You orchestrate the full game: setup, night phase, day discussion, voting, and resolution. AI subagents play the individual roles via the Telegram/WhatsApp bot pool.
 
 ## Game Overview
@@ -62,83 +71,90 @@ Always: `total cards = players + 3 center cards`. Prioritize swap/peek roles to 
 
 ## Game Engine
 
-A deterministic script handles all card shuffling, swapping, and state tracking. The Game Master calls it via Bash. The engine is at:
-
-```
-/home/node/.claude/skills/onuw-game/game-engine.mjs
-```
+A deterministic script handles all card shuffling, swapping, and state tracking. The Game Master calls it via Bash. Use the relative path from the skill directory.
 
 ### Commands
 
 **Initialize a new game:**
 ```bash
-node /home/node/.claude/skills/onuw-game/game-engine.mjs init --players 5 --state /workspace/group/onuw/state.json
+node .claude/skills/onuw-game/game-engine.mjs init --players 5 --state ./onuw/state.json
 ```
 
 With Mason variant:
 ```bash
-node /home/node/.claude/skills/onuw-game/game-engine.mjs init --players 5 --mason --state /workspace/group/onuw/state.json
+node .claude/skills/onuw-game/game-engine.mjs init --players 5 --mason --state ./onuw/state.json
 ```
 
 With custom player names:
 ```bash
-node /home/node/.claude/skills/onuw-game/game-engine.mjs init --players 5 --names "Alice,Bob,Charlie,Diana,Eve" --state /workspace/group/onuw/state.json
+node .claude/skills/onuw-game/game-engine.mjs init --players 5 --names "Alice,Bob,Charlie,Diana,Eve" --state ./onuw/state.json
 ```
 
 **Run the night phase (automatic random actions):**
 ```bash
-node /home/node/.claude/skills/onuw-game/game-engine.mjs night --state /workspace/group/onuw/state.json
+node .claude/skills/onuw-game/game-engine.mjs night --state ./onuw/state.json
 ```
 
 **Get a player's private view (what they know):**
 ```bash
-node /home/node/.claude/skills/onuw-game/game-engine.mjs player-view --player "Alice" --state /workspace/group/onuw/state.json
+node .claude/skills/onuw-game/game-engine.mjs player-view --player "Alice" --state ./onuw/state.json
 ```
 
 **Record a vote:**
 ```bash
-node /home/node/.claude/skills/onuw-game/game-engine.mjs vote --voter "Alice" --target "Bob" --state /workspace/group/onuw/state.json
+node .claude/skills/onuw-game/game-engine.mjs vote --voter "Alice" --target "Bob" --state ./onuw/state.json
 ```
 
 **Resolve the game (tally votes, determine winner):**
 ```bash
-node /home/node/.claude/skills/onuw-game/game-engine.mjs resolve --state /workspace/group/onuw/state.json
+node .claude/skills/onuw-game/game-engine.mjs resolve --state ./onuw/state.json
 ```
 
 If a Hunter is eliminated, specify who they take with them:
 ```bash
-node /home/node/.claude/skills/onuw-game/game-engine.mjs resolve --hunter-target "Alice" --state /workspace/group/onuw/state.json
+node .claude/skills/onuw-game/game-engine.mjs resolve --hunter-target "Alice" --state ./onuw/state.json
 ```
 
 **View full state (GM only — never share with players):**
 ```bash
-node /home/node/.claude/skills/onuw-game/game-engine.mjs state --state /workspace/group/onuw/state.json
+node .claude/skills/onuw-game/game-engine.mjs state --state ./onuw/state.json
 ```
 
 **Append a structured event to the game log (Vietnamese):**
 ```bash
-node /home/node/.claude/skills/onuw-game/game-engine.mjs log --event game-start --state /workspace/group/onuw/state.json
+node .claude/skills/onuw-game/game-engine.mjs log --event game-start --state ./onuw/state.json
 ```
 
 Valid `--event` values: `game-start`, `night-start`, `night-end`, `day-start`, `vote-start`, `vote-end`, `game-end`
 
 **Append a player's spoken line to the log:**
 ```bash
-node /home/node/.claude/skills/onuw-game/game-engine.mjs log-message \
+node .claude/skills/onuw-game/game-engine.mjs log-message \
   --player "Alice" \
   --round "opening" \
   --text "Tôi là Tiên Tri, tôi đã nhìn thấy bài của Bob và thấy anh ấy là Dân Làng." \
-  --state /workspace/group/onuw/state.json
+  --state ./onuw/state.json
 ```
 
 Valid `--round` values: `opening`, `discussion-1`, `discussion-2`, `vote`
 
 **Print the full game log:**
 ```bash
-node /home/node/.claude/skills/onuw-game/game-engine.mjs log-view --state /workspace/group/onuw/state.json
+node .claude/skills/onuw-game/game-engine.mjs log-view --state ./onuw/state.json
 ```
 
-The log is saved to `/workspace/group/onuw/game.log.md` alongside the state file.
+The log is saved to `./onuw/game.log.md` alongside the state file.
+
+## Output: send_message is Primary
+
+**IMPORTANT:** Use `mcp__nanoclaw__send_message` for ALL game communication:
+
+- Game announcements (phase changes, results) — send without `sender`
+- Player messages (when subagents speak) — send with `sender` set to player name
+
+This is the **primary output channel**. The file log (`game.log.md`) is supplementary — useful for post-game review but not the main way players observe the game.
+
+For CLI mode, send_message outputs to the terminal. For Telegram mode, it sends to the group chat.
 
 ## Language Detection
 

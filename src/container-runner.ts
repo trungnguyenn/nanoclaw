@@ -215,6 +215,8 @@ function readSecrets(): Record<string, string> {
     'ANTHROPIC_DEFAULT_HAIKU_MODEL',
     'ANTHROPIC_SMALL_FAST_MODEL',
     'ANTHROPIC_DISABLE_WEBSEARCH',
+    'ANTHROPIC_PROVIDER',
+    'GOOGLE_API_KEY',
     'TAVILY_API_KEY',
   ]);
 }
